@@ -27,21 +27,273 @@
       height: 100%;
       overflow: hidden;
       background-color: #FAFAFA;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
     }
     #app-frame {
+      flex: 1 1 auto;
       width: 100%;
-      height: 100%;
+      min-height: 0;
       border: none;
       display: block;
+    }
+
+    /* v4.12.17 — 아이콘 알림 숫자(배지) 켜기 안내 바. 앱 화면을 가리지 않게 iframe 아래 칸으로 둔다. */
+    #badgeTip {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
+      background: #111214;
+      color: #FFFFFF;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    #badgeTip[hidden] { display: none; }
+    #badgeTip .bt-ic {
+      width: 30px; height: 30px; flex: 0 0 30px; border-radius: 10px;
+      background: rgba(226,78,107,.18); color: #FF8FA3;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #badgeTip .bt-ic svg { width: 16px; height: 16px; }
+    #badgeTip .bt-tx { flex: 1; min-width: 0; }
+    #badgeTip .bt-tx b {
+      display: block; font-size: 13px; font-weight: 800; letter-spacing: -.2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #badgeTip .bt-tx span {
+      display: block; font-size: 10.5px; font-weight: 600; color: #A7ACB3; margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #badgeTipOn {
+      flex: 0 0 auto; height: 32px; padding: 0 14px; border: 0; border-radius: 999px;
+      background: #E24E6B; color: #FFF; font-size: 12.5px; font-weight: 800; font-family: inherit;
+    }
+    #badgeTipOn[hidden] { display: none; }
+    #badgeTipX {
+      flex: 0 0 auto; width: 28px; height: 28px; border: 0; border-radius: 50%;
+      background: none; color: #7C828A; font-size: 14px; line-height: 1; font-family: inherit;
     }
   </style>
 </head>
 <body>
   <iframe
     id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4138"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4139"
     allow="clipboard-read; clipboard-write; camera"
   ></iframe>
+
+  <div id="badgeTip" hidden>
+    <div class="bt-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+        <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
+      </svg>
+    </div>
+    <div class="bt-tx">
+      <b id="badgeTipT">아이콘 알림 숫자 켜기</b>
+      <span id="badgeTipS">홈 화면 아이콘에 처리할 일 숫자가 보입니다</span>
+    </div>
+    <button id="badgeTipOn" type="button">켜기</button>
+    <button id="badgeTipX" type="button" aria-label="닫기">✕</button>
+  </div>
+
+  <script>
+  /* ============================================================
+   * v4.12.17 — 홈 화면 아이콘 알림 숫자(배지) · 바깥 런처 담당
+   * ------------------------------------------------------------
+   * 앱(iframe, script.google.com)은 숫자만 세어 postMessage 로 넘긴다.
+   * iOS 16.4+ 의 navigator.setAppBadge()는 cross-origin iframe 안에서 부르면
+   * 무시되므로, 실제 배지 호출과 알림 권한 요청은 이 top-level 문서가 한다.
+   *   · 권한 요청은 반드시 사용자가 이 문서의 버튼을 직접 누를 때만 한다(제스처).
+   *   · 앱 → 런처 : { type:'okgil-badge', count, parts } · { type:'okgil-badge-hello' } · { type:'okgil-badge-ask' }
+   *   · 런처 → 앱 : { type:'okgil-badge-state', permission, supported, standalone }
+   * 닫기를 누르면 7일 뒤에 다시 안내한다. 앱 카드의 '켜는 방법'으로도 다시 띄운다.
+   * ============================================================ */
+  (function () {
+    var frame = document.getElementById('app-frame');
+    var tip = document.getElementById('badgeTip');
+    var tipT = document.getElementById('badgeTipT');
+    var tipS = document.getElementById('badgeTipS');
+    var tipOn = document.getElementById('badgeTipOn');
+    var tipX = document.getElementById('badgeTipX');
+    var TIP_KEY = 'okgil.badgeTip.v1';
+    var RECHECK_MS = 7 * 24 * 60 * 60 * 1000;
+
+    var lastCount = 0;
+    var lastParts = null;
+    var lastOrigin = '';
+    var asking = false;
+
+    /* 검증용 창구(화면에는 아무 영향 없음) */
+    var dbg = window.__okgilBadge = {
+      count: 0, parts: null, permission: '', supported: false,
+      standalone: false, apply: null, tip: 'hidden'
+    };
+
+    function isAppOrigin(origin) {
+      if (!origin) return false;
+      if (origin === 'https://script.google.com') return true;
+      return /^https:\/\/([a-z0-9-]+\.)*googleusercontent\.com$/i.test(origin);
+    }
+    function badgeSupported() {
+      try { return typeof navigator.setAppBadge === 'function'; } catch (e) { return false; }
+    }
+    function permission() {
+      try {
+        if (typeof Notification === 'undefined') return 'unsupported';
+        return Notification.permission || 'default';
+      } catch (e) { return 'unsupported'; }
+    }
+    function isStandalone() {
+      try {
+        if (window.navigator.standalone === true) return true;
+        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+      } catch (e) {}
+      return false;
+    }
+    function applyBadge(n) {
+      var num = Number(n) || 0;
+      if (!badgeSupported()) { dbg.apply = { n: num, ok: false, err: 'unsupported' }; return; }
+      try {
+        if (num > 0) navigator.setAppBadge(num); else navigator.clearAppBadge();
+        dbg.apply = { n: num, ok: true, err: '' };
+      } catch (e) {
+        dbg.apply = { n: num, ok: false, err: String((e && e.message) || e) };
+      }
+    }
+
+    /* ---------- 안내 바 ---------- */
+    function tipShow(mode) {
+      if (!tip) return;
+      if (mode === 'denied') {
+        tipT.textContent = '아이콘 알림이 꺼져 있습니다';
+        tipS.textContent = '아이폰 [설정 > 바나프레소 옥길점 > 알림]에서 켤 수 있어요';
+        if (tipOn) tipOn.hidden = true;
+      } else {
+        tipT.textContent = '아이콘 알림 숫자 켜기';
+        tipS.textContent = '홈 화면 아이콘에 처리할 일 숫자가 보입니다';
+        if (tipOn) tipOn.hidden = false;
+      }
+      tip.hidden = false;
+      dbg.tip = mode;
+    }
+    function tipHide() {
+      if (tip) tip.hidden = true;
+      dbg.tip = 'hidden';
+    }
+    function tipDismissedAt() {
+      try { return parseInt(localStorage.getItem(TIP_KEY) || '0', 10) || 0; } catch (e) { return 0; }
+    }
+    function refreshTip(force) {
+      var p = permission();
+      /* 아이콘 숫자는 홈 화면에 설치한 앱에서만 보이므로, 설치 화면(standalone)에서만 안내한다. */
+      if (p === 'granted' || !badgeSupported() || !isStandalone()) { tipHide(); return; }
+      if (p === 'denied' && !force) { tipHide(); return; }
+      if (!force) {
+        var at = tipDismissedAt();
+        if (at && (Date.now() - at) < RECHECK_MS) { tipHide(); return; }
+      }
+      tipShow(p === 'denied' ? 'denied' : 'ask');
+    }
+
+    /* ---------- 앱에 권한 상태 알리기 ---------- */
+    function sendState(origin) {
+      try {
+        if (!frame || !frame.contentWindow) return;
+        frame.contentWindow.postMessage({
+          type: 'okgil-badge-state',
+          permission: permission(),
+          supported: badgeSupported(),
+          standalone: isStandalone(),
+          count: lastCount
+        }, origin || lastOrigin || '*');
+      } catch (e) {}
+    }
+
+    /* ---------- 권한 요청(사용자 탭에서만) ---------- */
+    function askPermission() {
+      if (asking) return;
+      if (permission() === 'unsupported') return;
+      asking = true;
+      var settled = false;
+      function done(p) {
+        if (settled) return;
+        settled = true;
+        asking = false;
+        if (p === 'granted') {
+          try { localStorage.removeItem(TIP_KEY); } catch (e) {}
+          tipHide();
+          applyBadge(lastCount);
+        } else if (p === 'denied') {
+          tipShow('denied');
+        } else {
+          /* default — 사용자가 그냥 닫았다. 안내는 남겨 둔다. */
+        }
+        sendState('');
+      }
+      try {
+        var r = Notification.requestPermission(function (p) { done(p); });
+        if (r && typeof r.then === 'function') r.then(function (p) { done(p); });
+      } catch (e) {
+        asking = false;
+      }
+    }
+
+    if (tipOn) {
+      tipOn.addEventListener('click', function () { askPermission(); });
+    }
+    if (tipX) {
+      tipX.addEventListener('click', function () {
+        try { localStorage.setItem(TIP_KEY, String(Date.now())); } catch (e) {}
+        tipHide();
+      });
+    }
+
+    /* ---------- 앱에서 오는 메시지 ---------- */
+    window.addEventListener('message', function (ev) {
+      if (!frame || ev.source !== frame.contentWindow) return;
+      if (!isAppOrigin(ev.origin)) return;
+      var d = ev.data;
+      if (!d || typeof d !== 'object') return;
+      lastOrigin = ev.origin;
+
+      if (d.type === 'okgil-badge') {
+        var n = parseInt(d.count, 10);
+        if (!isFinite(n) || n < 0) n = 0;
+        lastCount = Math.min(n, 9999);
+        lastParts = d.parts || null;
+        dbg.count = lastCount;
+        dbg.parts = lastParts;
+        if (permission() === 'granted') applyBadge(lastCount);
+      } else if (d.type === 'okgil-badge-hello') {
+        sendState(ev.origin);
+        refreshTip(false);
+      } else if (d.type === 'okgil-badge-ask') {
+        refreshTip(true);
+        sendState(ev.origin);
+      }
+    });
+
+    /* ---------- 앱이 다시 보이면(설정에서 알림을 켜고 돌아온 경우 포함) ---------- */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) return;
+      dbg.permission = permission();
+      dbg.supported = badgeSupported();
+      dbg.standalone = isStandalone();
+      if (permission() === 'granted') applyBadge(lastCount);
+      refreshTip(false);
+      sendState('');
+    });
+
+    dbg.permission = permission();
+    dbg.supported = badgeSupported();
+    dbg.standalone = isStandalone();
+    refreshTip(false);
+  })();
+  </script>
 </body>
 </html>
