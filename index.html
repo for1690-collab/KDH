@@ -132,8 +132,11 @@
     /* 검증용 창구(화면에는 아무 영향 없음) */
     var dbg = window.__okgilBadge = {
       count: 0, parts: null, permission: '', supported: false,
-      standalone: false, apply: null, tip: 'hidden'
+      standalone: false, apply: null, tip: 'hidden', log: []
     };
+    function dlog(entry) {
+      try { if (dbg.log.length < 20) dbg.log.push(entry); } catch (e) {}
+    }
 
     function isAppOrigin(origin) {
       if (!origin) return false;
@@ -259,6 +262,8 @@
 
     /* ---------- 앱에서 오는 메시지 ---------- */
     window.addEventListener('message', function (ev) {
+      dlog([String(ev.origin), String((ev.data && ev.data.type) || typeof ev.data),
+            String((ev.data && ev.data.count))]);
       /* 중간 껍데기 프레임 때문에 source 는 frame.contentWindow 와 같지 않다.
        * 앱 오리진에서 온 okgil-* 메시지만 받는다(그 밖의 값은 배지·안내 상태만 바꾼다). */
       if (!isAppOrigin(ev.origin)) return;
