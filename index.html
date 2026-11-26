@@ -82,7 +82,7 @@
 <body>
   <iframe
     id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4139"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4140"
     allow="clipboard-read; clipboard-write; camera"
   ></iframe>
 
@@ -126,6 +126,7 @@
     var lastCount = 0;
     var lastParts = null;
     var lastOrigin = '';
+    var lastSource = null;
     var asking = false;
 
     /* 검증용 창구(화면에는 아무 영향 없음) */
@@ -200,11 +201,14 @@
       tipShow(p === 'denied' ? 'denied' : 'ask');
     }
 
-    /* ---------- 앱에 권한 상태 알리기 ---------- */
-    function sendState(origin) {
+    /* ---------- 앱에 권한 상태 알리기 ----------
+     * Apps Script 는 사용자 HTML 을 껍데기 안 sandbox iframe 에 한 겹 더 넣어 서빙한다.
+     * 그래서 앱 창은 frame.contentWindow 가 아니라 그 안쪽 창이다 — 받은 메시지의 source 로 답한다. */
+    function sendState(source, origin) {
+      var win = source || lastSource;
+      if (!win) return;
       try {
-        if (!frame || !frame.contentWindow) return;
-        frame.contentWindow.postMessage({
+        win.postMessage({
           type: 'okgil-badge-state',
           permission: permission(),
           supported: badgeSupported(),
@@ -233,7 +237,7 @@
         } else {
           /* default — 사용자가 그냥 닫았다. 안내는 남겨 둔다. */
         }
-        sendState('');
+        sendState(lastSource, lastOrigin);
       }
       try {
         var r = Notification.requestPermission(function (p) { done(p); });
@@ -255,11 +259,13 @@
 
     /* ---------- 앱에서 오는 메시지 ---------- */
     window.addEventListener('message', function (ev) {
-      if (!frame || ev.source !== frame.contentWindow) return;
+      /* 중간 껍데기 프레임 때문에 source 는 frame.contentWindow 와 같지 않다.
+       * 앱 오리진에서 온 okgil-* 메시지만 받는다(그 밖의 값은 배지·안내 상태만 바꾼다). */
       if (!isAppOrigin(ev.origin)) return;
       var d = ev.data;
       if (!d || typeof d !== 'object') return;
       lastOrigin = ev.origin;
+      lastSource = ev.source || lastSource;
 
       if (d.type === 'okgil-badge') {
         var n = parseInt(d.count, 10);
@@ -270,11 +276,11 @@
         dbg.parts = lastParts;
         if (permission() === 'granted') applyBadge(lastCount);
       } else if (d.type === 'okgil-badge-hello') {
-        sendState(ev.origin);
+        sendState(ev.source, ev.origin);
         refreshTip(false);
       } else if (d.type === 'okgil-badge-ask') {
         refreshTip(true);
-        sendState(ev.origin);
+        sendState(ev.source, ev.origin);
       }
     });
 
@@ -286,7 +292,7 @@
       dbg.standalone = isStandalone();
       if (permission() === 'granted') applyBadge(lastCount);
       refreshTip(false);
-      sendState('');
+      sendState(lastSource, lastOrigin);
     });
 
     dbg.permission = permission();
