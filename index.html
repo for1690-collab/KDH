@@ -82,101 +82,44 @@
       background: none; color: #7C828A; font-size: 14px; line-height: 1; font-family: inherit;
     }
 
-    /* v4.12.32 — 앱이 뜨기 전(1.5~2초)을 브랜드 스플래시 대신 '앱과 같은 첫 화면 모양'(스켈레톤)으로 채운다.
-       상단 바·오늘 매출 카드·할 일 카드·하단 탭을 앱과 같은 자리·같은 색으로 먼저 그려 두고,
-       앱이 첫 화면을 그렸다는 신호(okgil-paint)나 iframe load 를 받으면 0.28초에 걸쳐 사라진다.
-       값(매출·재고)은 앱이 도착하는 대로 채운다 — 여기서는 숫자를 지어내지 않는다. */
+    /* v4.12.35 — v4.12.31(fccea0a)의 핑크 로딩화면 그대로. (v4.12.32 에서 스켈레톤으로 바꿨다가 되돌림)
+       v4.12.24 — 앱이 뜨기 전(약 2초) 회색 화면 대신 앱과 똑같은 시작 화면을 보여 준다.
+       앱 안의 스플래시(#splash)와 같은 그라데이션·로고·문구라, 넘어갈 때 바뀌는 것이 보이지 않는다.
+       앱이 첫 화면을 그렸다는 신호(okgil-paint)나 iframe load 를 받으면 0.28초에 걸쳐 사라진다. */
     #boot {
       position: fixed; inset: 0; z-index: 50;
-      display: flex; flex-direction: column;
-      background: #FAFAFA; color: #111214; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(168deg, #F27C93 0%, #E24E6B 46%, #C6314C 100%);
       transition: opacity .28s;
     }
     #boot.hide { opacity: 0; pointer-events: none; }
-    .bk-wrap {
-      flex: 1 1 auto; min-height: 0; width: 100%; max-width: 640px; margin: 0 auto;
-      display: flex; flex-direction: column; background: #FAFAFA;
+    #boot .bl {
+      width: 100px; height: 100px; border-radius: 23px;
+      box-shadow: 0 12px 30px rgba(16,24,40,.28);
     }
-    .bk-bar {
-      flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
-      background: linear-gradient(180deg, #E1455F 0%, #D0384F 100%);
-      border-bottom: 0; padding: calc(9px + env(safe-area-inset-top)) 14px 11px;
+    #boot .bt { margin-top: 18px; font-size: 18px; line-height: 26px; font-weight: 800; color: #FFF; letter-spacing: -.3px; }
+    #boot .bs { margin-top: 5px; font-size: 11.5px; line-height: 16px; font-weight: 650; color: rgba(255,255,255,.88); letter-spacing: .16em; }
+    #boot .bc {
+      width: 20px; height: 20px; margin-top: 18px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.35); border-top-color: #FFF;
+      animation: bspin .8s linear infinite;
     }
-    .bk-title { flex: 1; min-width: 0; padding-left: 2px; }
-    .bk-title b { display: block; font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -.3px; color: #FFF; }
-    .bk-title span { display: block; font-size: 11px; line-height: 1.3; color: rgba(255,255,255,.9); margin-top: 2px; }
-    .bk-ib {
-      width: 44px; height: 44px; flex: 0 0 44px; border: 0; border-radius: 13px;
-      background: rgba(255,255,255,.2); color: #FFF;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .bk-ib svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .bk-main { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-    .bk-hero {
-      background: linear-gradient(168deg, #EF5F7C 0%, #E24E6B 58%, #D84561 100%);
-      color: #FFF; padding: 4px 18px 16px; border-radius: 0 0 26px 26px;
-    }
-    .bk-hero .l { font-size: 12px; font-weight: 800; letter-spacing: -.1px; opacity: .94; }
-    .bk-sec { padding: 10px 14px 0; display: flex; flex-direction: column; gap: 10px; }
-    .bk-task {
-      display: flex; align-items: center; gap: 12px; background: #FFF; border-radius: 18px;
-      padding: 11px 13px; box-shadow: 0 1px 3px rgba(60,32,24,.06);
-    }
-    .sk { display: block; border-radius: 7px; background: #EDE8E4; animation: skp 1.25s ease-in-out infinite; }
-    .sk-v { background: rgba(255,255,255,.52); border-radius: 10px; margin-top: 12px; }
-    .sk-w { background: rgba(255,255,255,.34); height: 10px; margin-top: 9px; }
-    .sk-ic { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px; }
-    .sk-tx { flex: 1; min-width: 0; }
-    .sk-t { height: 12px; border-radius: 6px; }
-    .sk-t.sm { height: 9px; margin-top: 7px; }
-    .bk-tabs {
-      flex: 0 0 auto; display: flex; background: #FFF; border-top: 1px solid #E9E9E7;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .bk-tab {
-      flex: 1; height: 56px; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 3px; color: #8A9099; font-size: 11px; font-weight: 750; letter-spacing: -.2px;
-    }
-    .bk-tab.on { color: #CE3B54; }
-    .bk-tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    @keyframes skp { 0%, 100% { opacity: 1; } 50% { opacity: .48; } }
+    #boot .bm { margin-top: 10px; font-size: 12.5px; line-height: 18px; color: rgba(255,255,255,.92); }
+    @keyframes bspin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div id="boot" aria-hidden="true">
-    <div class="bk-wrap">
-      <div class="bk-bar">
-        <div class="bk-title"><b>부천옥길점</b><span>불러오는 중…</span></div>
-        <div class="bk-ib"><svg viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg></div>
-        <div class="bk-ib"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        <div class="bk-ib"><svg viewBox="0 0 24 24"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></div>
-      </div>
-      <div class="bk-main">
-        <div class="bk-hero">
-          <div class="l">오늘 매출</div>
-          <div class="sk sk-v" style="width:152px;height:40px"></div>
-          <div class="sk sk-w" style="width:212px"></div>
-          <div class="sk sk-w" style="width:136px"></div>
-        </div>
-        <div class="bk-sec">
-          <div class="bk-task"><div class="sk sk-ic"></div><div class="sk-tx">
-            <div class="sk sk-t" style="width:122px"></div><div class="sk sk-t sm" style="width:174px"></div></div></div>
-          <div class="bk-task"><div class="sk sk-ic"></div><div class="sk-tx">
-            <div class="sk sk-t" style="width:98px"></div><div class="sk sk-t sm" style="width:152px"></div></div></div>
-        </div>
-      </div>
-      <div class="bk-tabs">
-        <div class="bk-tab on"><svg viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>홈</div>
-        <div class="bk-tab"><svg viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/></svg>재고</div>
-        <div class="bk-tab"><svg viewBox="0 0 24 24"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></svg>발주</div>
-        <div class="bk-tab"><svg viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>자료</div>
-      </div>
-    </div>
+    <img class="bl" src="splash.png" alt="">
+    <div class="bt">옥길점 재고</div>
+    <div class="bs">BANAPRESSO 부천옥길점</div>
+    <div class="bc"></div>
+    <div class="bm">재고 데이터를 불러오는 중…</div>
   </div>
 
   <iframe
     id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4159"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4160"
     allow="clipboard-read; clipboard-write; camera"
   ></iframe>
 
@@ -219,7 +162,8 @@
 
     /* ---------- v4.12.24 시작 화면 걷기 ----------
      * 앱(iframe)이 첫 화면을 그리면 { type:'okgil-paint' } 를 보낸다 → 그때 바로 걷는다.
-     * 신호가 없으면(옛 앱 버전 등) iframe load 뒤 300ms, 마지막으로 3.5초 뒤에 걷는다.
+     * v4.12.35 — 앱은 '첫 화면 값이 실제로 그려진 순간'에 보낸다(스켈레톤 직후가 아니다).
+     * 폴백: iframe load 뒤 4초(옛 앱·앱 오류), 마지막으로 15초(문서를 못 받은 경우).
      * 걷은 뒤에는 누르는 것을 막지 않는다(pointer-events:none + DOM 제거). */
     var bootEl = document.getElementById('boot');
     var bootOff = false;
@@ -229,8 +173,8 @@
       try { bootEl.classList.add('hide'); } catch (e) {}
       setTimeout(function(){ try { bootEl.parentNode.removeChild(bootEl); } catch (e) {} }, 320);
     }
-    try { frame.addEventListener('load', function(){ setTimeout(bootHide, 300); }); } catch (e) {}
-    setTimeout(bootHide, 3500);
+    try { frame.addEventListener('load', function(){ setTimeout(bootHide, 4000); }); } catch (e) {}
+    setTimeout(bootHide, 15000);
 
     var lastCount = 0;
     var lastParts = null;
