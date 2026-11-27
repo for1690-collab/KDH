@@ -18,6 +18,10 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
 
+  <!-- v4.12.24 — 앱(script.google.com) 연결을 미리 열어 둔다(앱 문서 요청이 조금 일찍 시작된다) -->
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
+
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -77,12 +81,44 @@
       flex: 0 0 auto; width: 28px; height: 28px; border: 0; border-radius: 50%;
       background: none; color: #7C828A; font-size: 14px; line-height: 1; font-family: inherit;
     }
+
+    /* v4.12.24 — 앱이 뜨기 전(약 2초) 회색 화면 대신 앱과 똑같은 시작 화면을 보여 준다.
+       앱 안의 스플래시(#splash)와 같은 그라데이션·로고·문구라, 넘어갈 때 바뀌는 것이 보이지 않는다.
+       앱이 첫 화면을 그렸다는 신호(okgil-paint)나 iframe load 를 받으면 0.28초에 걸쳐 사라진다. */
+    #boot {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(168deg, #F27C93 0%, #E24E6B 46%, #C6314C 100%);
+      transition: opacity .28s;
+    }
+    #boot.hide { opacity: 0; pointer-events: none; }
+    #boot .bl {
+      width: 100px; height: 100px; border-radius: 23px;
+      box-shadow: 0 12px 30px rgba(16,24,40,.28);
+    }
+    #boot .bt { margin-top: 18px; font-size: 18px; line-height: 26px; font-weight: 800; color: #FFF; letter-spacing: -.3px; }
+    #boot .bs { margin-top: 5px; font-size: 11.5px; line-height: 16px; font-weight: 650; color: rgba(255,255,255,.88); letter-spacing: .16em; }
+    #boot .bc {
+      width: 20px; height: 20px; margin-top: 18px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.35); border-top-color: #FFF;
+      animation: bspin .8s linear infinite;
+    }
+    #boot .bm { margin-top: 10px; font-size: 12.5px; line-height: 18px; color: rgba(255,255,255,.92); }
+    @keyframes bspin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+  <div id="boot" aria-hidden="true">
+    <img class="bl" src="splash.png" alt="">
+    <div class="bt">옥길점 재고</div>
+    <div class="bs">BANAPRESSO 부천옥길점</div>
+    <div class="bc"></div>
+    <div class="bm">재고 데이터를 불러오는 중…</div>
+  </div>
+
   <iframe
     id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4149"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4150"
     allow="clipboard-read; clipboard-write; camera"
   ></iframe>
 
@@ -122,6 +158,21 @@
     var tipX = document.getElementById('badgeTipX');
     var TIP_KEY = 'okgil.badgeTip.v1';
     var RECHECK_MS = 7 * 24 * 60 * 60 * 1000;
+
+    /* ---------- v4.12.24 시작 화면 걷기 ----------
+     * 앱(iframe)이 첫 화면을 그리면 { type:'okgil-paint' } 를 보낸다 → 그때 바로 걷는다.
+     * 신호가 없으면(옛 앱 버전 등) iframe load 뒤 300ms, 마지막으로 3.5초 뒤에 걷는다.
+     * 걷은 뒤에는 누르는 것을 막지 않는다(pointer-events:none + DOM 제거). */
+    var bootEl = document.getElementById('boot');
+    var bootOff = false;
+    function bootHide(){
+      if (bootOff || !bootEl) return;
+      bootOff = true;
+      try { bootEl.classList.add('hide'); } catch (e) {}
+      setTimeout(function(){ try { bootEl.parentNode.removeChild(bootEl); } catch (e) {} }, 320);
+    }
+    try { frame.addEventListener('load', function(){ setTimeout(bootHide, 300); }); } catch (e) {}
+    setTimeout(bootHide, 3500);
 
     var lastCount = 0;
     var lastParts = null;
@@ -272,6 +323,10 @@
       lastOrigin = ev.origin;
       lastSource = ev.source || lastSource;
 
+      if (d.type === 'okgil-paint') {
+        bootHide();
+        return;
+      }
       if (d.type === 'okgil-badge') {
         var n = parseInt(d.count, 10);
         if (!isFinite(n) || n < 0) n = 0;
