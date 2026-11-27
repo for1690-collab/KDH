@@ -163,7 +163,8 @@
     /* ---------- v4.12.24 시작 화면 걷기 ----------
      * 앱(iframe)이 첫 화면을 그리면 { type:'okgil-paint' } 를 보낸다 → 그때 바로 걷는다.
      * v4.12.35 — 앱은 '첫 화면 값이 실제로 그려진 순간'에 보낸다(스켈레톤 직후가 아니다).
-     * 폴백: iframe load 뒤 4초(옛 앱·앱 오류), 마지막으로 15초(문서를 못 받은 경우).
+     * 그래서 걷히는 때는 신호 하나로 정한다 — iframe load 시각으로 재면 데이터가 늦는 날
+     * 값이 오기 전에 걷혀 회색 뼈대가 드러난다(실측). 마지막 안전장치로 12초 뒤에 걷는다.
      * 걷은 뒤에는 누르는 것을 막지 않는다(pointer-events:none + DOM 제거). */
     var bootEl = document.getElementById('boot');
     var bootOff = false;
@@ -173,8 +174,7 @@
       try { bootEl.classList.add('hide'); } catch (e) {}
       setTimeout(function(){ try { bootEl.parentNode.removeChild(bootEl); } catch (e) {} }, 320);
     }
-    try { frame.addEventListener('load', function(){ setTimeout(bootHide, 4000); }); } catch (e) {}
-    setTimeout(bootHide, 15000);
+    setTimeout(bootHide, 12000);
 
     var lastCount = 0;
     var lastParts = null;
