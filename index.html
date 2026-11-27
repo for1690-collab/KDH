@@ -2,12 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>바나프레소 옥길점</title>
+  <title>바나프레소·바나커피 옥길점</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="바나프레소 옥길점">
-  <meta name="theme-color" content="#FAFAFA">
+  <meta name="apple-mobile-web-app-title" content="바나프레소·바나커피 옥길점">
+  <meta name="theme-color" content="#7A1F38">
 
   <!-- Apple Touch Icons (iOS 사파리 홈 화면 추가 시 토끼 아이콘 자동 인식) -->
   <link rel="apple-touch-icon" href="icon_pink.png">
@@ -89,13 +89,14 @@
     #boot {
       position: fixed; inset: 0; z-index: 50;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(168deg, #F27C93 0%, #E24E6B 46%, #C6314C 100%);
+      background: radial-gradient(120% 62% at 50% 108%, rgba(214,58,92,.55) 0%, rgba(214,58,92,0) 62%),
+                  linear-gradient(168deg, #A62E50 0%, #8A2240 46%, #641530 100%);
       transition: opacity .28s;
     }
     #boot.hide { opacity: 0; pointer-events: none; }
     #boot .bl {
       width: 100px; height: 100px; border-radius: 23px;
-      box-shadow: 0 12px 30px rgba(16,24,40,.28);
+      box-shadow: 0 12px 30px rgba(40,8,18,.42), 0 0 0 1px rgba(255,255,255,.16);
     }
     #boot .bt { margin-top: 18px; font-size: 18px; line-height: 26px; font-weight: 800; color: #FFF; letter-spacing: -.3px; }
     #boot .bs { margin-top: 5px; font-size: 11.5px; line-height: 16px; font-weight: 650; color: rgba(255,255,255,.88); letter-spacing: .16em; }
@@ -111,15 +112,15 @@
 <body>
   <div id="boot" aria-hidden="true">
     <img class="bl" src="splash.png" alt="">
-    <div class="bt">옥길점 재고</div>
-    <div class="bs">BANAPRESSO 부천옥길점</div>
+    <div class="bt">바나프레소 · 바나커피</div>
+    <div class="bs">부천옥길점 · BANA COFFEE</div>
     <div class="bc"></div>
     <div class="bm">재고 데이터를 불러오는 중…</div>
   </div>
 
   <iframe
     id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4160"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4161"
     allow="clipboard-read; clipboard-write; camera"
   ></iframe>
 
@@ -228,7 +229,7 @@
       if (!tip) return;
       if (mode === 'denied') {
         tipT.textContent = '아이콘 알림이 꺼져 있습니다';
-        tipS.textContent = '아이폰 [설정 > 바나프레소 옥길점 > 알림]에서 켤 수 있어요';
+        tipS.textContent = '아이폰 [설정 > 바나프레소·바나커피 옥길점 > 알림]에서 켤 수 있어요';
         if (tipOn) tipOn.hidden = true;
       } else {
         tipT.textContent = '아이콘 알림 숫자 켜기';
