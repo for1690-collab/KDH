@@ -1,0 +1,16 @@
+{
+  "name": "바나프레소·바나커피 옥길점",
+  "short_name": "바나프레소·바나커피",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F8F2ED",
+  "theme_color": "#7A1F38",
+  "icons": [
+    {
+      "src": "icon_pink.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
