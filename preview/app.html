@@ -43,6 +43,17 @@
     out.boot = fire('getBootstrap');
     out.live = fire('getLive');
   }
+  /* 런처(같은 오리진 top)가 먼저 받아 둔 약속을 그대로 쓴다 — 앱 HTML 이 도착하기 전에
+     요청이 뜨 있어 모바일에서 0.2~0.4초 빨라진다. 없으면 스스로 쏜다. */
+  function takeFromHost(which){
+    try{
+      if(window.top && window.top !== window && window.top.__okgilEarlyTake){
+        var p = window.top.__okgilEarlyTake(which);
+        if(p) return Promise.resolve(p);
+      }
+    }catch(e){}
+    return null;
+  }
   function jsonp(task){
     return new Promise(function(resolve){
       var done = false, tag = null;
@@ -80,8 +91,8 @@
       setTimeout(wait, 10);
     })();
   }else{
-    out.boot = jsonp('bootjs');
-    out.live = jsonp('livejs');
+    out.boot = takeFromHost('boot') || jsonp('bootjs');
+    out.live = takeFromHost('live') || jsonp('livejs');
   }
 })();
 

@@ -29,6 +29,44 @@
   <!-- v4.12.37 — 스플래시 사진을 먼저 받아 둔다(로딩화면 첫 그림) -->
   <link rel="preload" as="image" href="splash.png">
 
+  <!-- v4.12.42 — 첫 데이터를 런처가 먼저 받아 둔다.
+       앱 HTML(614K자)이 도착해 자기 스크립트를 실행할 때까지(모바일 LTE 에서 약 0.4초) 기다리지 않고,
+       이 작은 문서가 읽기 전용 JSONP 를 먼저 쏘다. 같은 오리진이라 앱이 window.top 의 약속을 그대로 받아 쓴다.
+       앱을 직접 열었을 때는 앱이 스스로 쏘다. -->
+  <script>
+  (function () {
+    var EXEC = 'https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec';
+    var KEY = 'okgil-boot-2f7d41c8e6';
+    var box = window.__okgilEarlyBoot = {};
+    function make(task, slot) {
+      box[slot] = new Promise(function (resolve) {
+        var done = false, tag = null;
+        function fin(v, err) {
+          if (done) return; done = true;
+          try { if (tag && tag.parentNode) tag.parentNode.removeChild(tag); } catch (e) {}
+          resolve(err ? { ok: false, e: v } : { ok: true, v: v });
+        }
+        var cb = '__okgilHost' + slot + Math.floor(Math.random() * 1e8);
+        window[cb] = function (v) {
+          fin(v);
+          try { setTimeout(function () { try { delete window[cb]; } catch (e) {} }, 0); } catch (e) {}
+        };
+        setTimeout(function () { fin('timeout', true); }, 15000);
+        try {
+          tag = document.createElement('script');
+          tag.async = true;
+          tag.src = EXEC + '?task=' + task + '&key=' + KEY + '&cb=' + cb + '&_=' + (+new Date());
+          tag.onerror = function () { fin('network', true); };
+          (document.head || document.documentElement).appendChild(tag);
+        } catch (e) { fin(String(e), true); }
+      });
+    }
+    make('bootjs', 'boot');
+    make('livejs', 'live');
+    window.__okgilEarlyTake = function (which) { return box[which] || null; };
+  })();
+  </script>
+
   <style>
     * { box-sizing: border-box; }
     html, body {
