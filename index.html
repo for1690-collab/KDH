@@ -122,6 +122,13 @@
       background: #E24E6B; color: #FFF; font-size: 12.5px; font-weight: 800; font-family: inherit;
     }
     #badgeTipOn[hidden] { display: none; }
+    /* v4.12.43 — 누른 순간 '확인 중…' 으로 잠깐 잠기는 동안 눌린 느낌을 준다 */
+    #badgeTipOn[disabled] { opacity: .55; }
+    /* v4.12.43 — 거부·차단 안내는 기기별 설정 경로가 길어서 잘리지 않게 두 줄까지 펼친다 */
+    #badgeTip[data-mode="denied"] .bt-tx span,
+    #badgeTip[data-mode="blocked"] .bt-tx span {
+      white-space: normal; overflow: visible; text-overflow: clip; line-height: 15px;
+    }
     #badgeTipX {
       flex: 0 0 auto; width: 28px; height: 28px; border: 0; border-radius: 50%;
       background: none; color: #7C828A; font-size: 14px; line-height: 1; font-family: inherit;
@@ -289,18 +296,42 @@
       }
     }
 
-    /* ---------- 안내 바 ---------- */
+    /* ---------- 안내 바 ----------
+     * v4.12.43 — 안드로이드(갤럭시)에서 [켜기]를 눌러도 아무 반응이 없던 문제.
+     * 권한 창이 아예 뜨지 않거나(차단) 거부되면, 아이폰 설정 경로만 알려 주던 것을
+     * 기기(안드로이드·아이폰)에 맞는 설정 경로로 바꿔 안내한다. */
+    function isAndroidUA() {
+      try { return /Android/i.test(String(navigator.userAgent || '')); } catch (e) { return false; }
+    }
+    function isIOSUA() {
+      try { return /iPhone|iPad|iPod/i.test(String(navigator.userAgent || '')); } catch (e) { return false; }
+    }
+    function deviceHint() {
+      if (isAndroidUA()) return '기기의 [설정 > 애플리케이션 > 사용 중인 브라우저(또는 옥길점 앱) > 알림] 또는 브라우저 설정에서 알림을 켜 주세요';
+      if (isIOSUA()) return '아이폰 [설정 > 바나프레소·바나커피 옥길점 > 알림]에서 켤 수 있어요';
+      return '브라우저 주소창의 자물쇠 > 알림 에서 알림을 허용해 주세요';
+    }
+    function setOnButton(label, busy) {
+      if (!tipOn) return;
+      tipOn.textContent = label;
+      try { tipOn.disabled = !!busy; } catch (e) {}
+    }
     function tipShow(mode) {
       if (!tip) return;
       if (mode === 'denied') {
         tipT.textContent = '아이콘 알림이 꺼져 있습니다';
-        tipS.textContent = '아이폰 [설정 > 바나프레소·바나커피 옥길점 > 알림]에서 켤 수 있어요';
+        tipS.textContent = deviceHint();
         if (tipOn) tipOn.hidden = true;
+      } else if (mode === 'blocked') {
+        tipT.textContent = '알림 창이 열리지 않았습니다';
+        tipS.textContent = deviceHint();
+        if (tipOn) { tipOn.hidden = false; setOnButton('켜기', false); }
       } else {
         tipT.textContent = '아이콘 알림 숫자 켜기';
         tipS.textContent = '홈 화면 아이콘에 처리할 일 숫자가 보입니다';
-        if (tipOn) tipOn.hidden = false;
+        if (tipOn) { tipOn.hidden = false; setOnButton('켜기', false); }
       }
+      try { tip.setAttribute('data-mode', mode); } catch (e) {}
       tip.hidden = false;
       dbg.tip = mode;
     }
@@ -340,37 +371,89 @@
       } catch (e) {}
     }
 
-    /* ---------- 권한 요청(사용자 탭에서만) ---------- */
+    /* ---------- 권한 요청(사용자 탭에서만) ----------
+     * v4.12.43 — 안드로이드에서 [켜기]가 먹통이던 원인 세 가지를 함께 고친다.
+     *   ① 누르면 바로 '확인 중…' 으로 바꿔 눌린 것이 보이게 한다.
+     *   ② 표준 호출(인자 없음) 결과가 Promise 면 .then(done, fail) 만 쓴다. 구형 콜백은
+     *      Promise 가 아닐 때만 쓴다(둘을 같이 부르면 done 이 두 번 불리거나 팝업이 막힌다).
+     *   ③ 결과가 default(차단)이거나 예외·4초 무응답이면 조용히 끝내지 않고 안내로 바꾸고,
+     *      asking 잠금과 버튼을 반드시 되돌린다(그래야 다시 누를 수 있다).
+     */
     function askPermission() {
       if (asking) return;
       if (permission() === 'unsupported') return;
       asking = true;
-      var settled = false;
-      function done(p) {
-        if (settled) return;
-        settled = true;
+      setOnButton('확인 중…', true);
+      var answered = false, locked = true, timer = null;
+
+      function unlock() {
+        if (!locked) return;
+        locked = false;
         asking = false;
-        if (p === 'granted') {
+        if (tipOn) tipOn.hidden = false;
+        setOnButton('켜기', false);
+      }
+      function answer(p) {
+        if (answered) return;
+        answered = true;
+        if (timer) { clearTimeout(timer); timer = null; }
+        unlock();
+        var q = p === 'granted' || p === 'denied' ? p : 'default';
+        if (q === 'granted') {
           try { localStorage.removeItem(TIP_KEY); } catch (e) {}
           tipHide();
           applyBadge(lastCount);
-        } else if (p === 'denied') {
+        } else if (q === 'denied') {
           tipShow('denied');
         } else {
-          /* default — 사용자가 그냥 닫았다. 안내는 남겨 둔다. */
+          /* default — 브라우저/OS 가 권한 창을 띄우지 않고 막았다. 안내로 바꾼다. */
+          tipShow('blocked');
         }
+        dbg.permission = permission();
         sendState(lastSource, lastOrigin);
       }
+      /* 4초 안에 아무 대답이 없으면 화면부터 되돌린다(잠금이 남지 않게).
+       * 단, 이때도 권한 창은 열려 있을 수 있으므로 대답이 늦게 오면 그대로 반영한다. */
+      timer = setTimeout(function () {
+        timer = null;
+        if (answered) return;
+        unlock();
+        var live = permission();
+        if (live === 'granted') { answered = true; tipHide(); applyBadge(lastCount); }
+        else if (live === 'denied') { answered = true; tipShow('denied'); }
+        else tipShow('blocked');
+        dbg.permission = live;
+        sendState(lastSource, lastOrigin);
+      }, 4000);
+
       try {
-        var r = Notification.requestPermission(function (p) { done(p); });
-        if (r && typeof r.then === 'function') r.then(function (p) { done(p); });
+        var r = null, threw = false;
+        try { r = Notification.requestPermission(); } catch (e1) { threw = true; }
+        if (r && typeof r.then === 'function') {
+          r.then(function (p) { answer(p); }, function () { answer('error'); });
+          return;
+        }
+        if (threw || r === undefined || r === null) {
+          /* 구형 브라우저만 콜백 폴백(인자 없는 호출이 안 되는 경우) */
+          try {
+            Notification.requestPermission(function (p) { answer(p); });
+          } catch (e2) {
+            answer('error');
+          }
+          return;
+        }
+        /* 드물게 문자열을 바로 돌려주는 구현 */
+        answer(typeof r === 'string' ? r : 'default');
       } catch (e) {
-        asking = false;
+        answer('error');
       }
     }
 
     if (tipOn) {
-      tipOn.addEventListener('click', function () { askPermission(); });
+      tipOn.addEventListener('click', function () {
+        if (asking || tipOn.disabled) return;
+        askPermission();
+      });
     }
     if (tipX) {
       tipX.addEventListener('click', function () {
