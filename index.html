@@ -215,6 +215,21 @@
      * 그래서 걷히는 때는 신호 하나로 정한다 — iframe load 시각으로 재면 데이터가 늦는 날
      * 값이 오기 전에 걷혀 회색 뼈대가 드러난다(실측). 마지막 안전장치로 12초 뒤에 걷는다.
      * 걷은 뒤에는 누르는 것을 막지 않는다(pointer-events:none + DOM 제거). */
+    /* v4.12.42 안전망 — app.html 이 뜨지 못했을 때(깃허브 장애·404·잘린 배포) 9초 뒤에
+       예전 경로(앱스크립트 /exec)로 한 번만 바꿔 단다. 정상 로드는 1.4~2.0초라 이 문턱에
+       걸리지 않는다. 앱이 시작되면 __okgilEarly 가 반드시 생긴다. */
+    var fellBack = false;
+    setTimeout(function () {
+      if (fellBack || bootOff) return;
+      var started = false;
+      try { started = !!(frame && frame.contentWindow && frame.contentWindow.__okgilEarly); } catch (e) { started = false; }
+      if (started) return;
+      fellBack = true;
+      try {
+        frame.src = 'https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4166';
+      } catch (e) {}
+    }, 9000);
+
     var bootEl = document.getElementById('boot');
     var bootOff = false;
     function bootHide(){
