@@ -10785,6 +10785,7 @@ function xInput(ev){
    * 런처(index.html)에 설치를 요청하고, 런처가 알려 주는 상태(가능/불가)를 받아
    *  · 가능하면 설치 창을 띄우고  · 불가하면 기기별 수동 경로를 안내한다. */
   var hAvail = false, hPlatform = '', hSamsung = false, hStandalone = false;
+  var dbgApp = window.__okgilInstallApp = { available: false, platform: '', samsung: false, states: 0, asks: 0 };
   function hostPost(msg){
     try{
       if(window.top && window.top !== window){ window.top.postMessage(msg, '*'); return true; }
@@ -10805,6 +10806,7 @@ function xInput(ev){
     hStandalone = !!d.standalone;
     if(d.platform) hPlatform = String(d.platform);
     hSamsung = !!d.samsung;
+    try{ dbgApp.available = hAvail; dbgApp.platform = hPlatform; dbgApp.samsung = hSamsung; dbgApp.states++; }catch(e){}
     try{ if(guide) guide.textContent = guideText(); }catch(e){}
     if(d.installed || d.result === 'accepted' || d.result === 'installed'){
       try{ hostSet(KEY, INSTALLED); }catch(e){}
@@ -10913,6 +10915,7 @@ function xInput(ev){
     if(e) e.stopPropagation();
     /* v4.12.44 — 최상위 런처가 설치 가능하다고 알려 왔으면, 설치 창은 런처가 띄운다. */
     if(hAvail){
+      try{ dbgApp.asks++; }catch(e){}
       if(hostPost({ type: 'okgil-install-prompt' })) return;
     }
     if(prompt){
