@@ -21,6 +21,13 @@
   <!-- v4.12.24 — 앱(script.google.com) 연결을 미리 열어 둔다(앱 문서 요청이 조금 일찍 시작된다) -->
   <link rel="preconnect" href="https://script.google.com" crossorigin>
   <link rel="dns-prefetch" href="https://script.google.com">
+  <!-- v4.12.37 — 앱 문서·껍데기는 실제로 이 호스트(googleusercontent)에서 온다. 세 번째 홉의
+       DNS·TLS 를 미리 맺어 둔다. 배포ID 가 그대로면 호스트 이름도 그대로다. -->
+  <link rel="preconnect" href="https://n-r5ngyv7ge5f3smtysi2umyboyoouady337z3i7q-0lu-script.googleusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://n-r5ngyv7ge5f3smtysi2umyboyoouady337z3i7q-0lu-script.googleusercontent.com">
+  <link rel="dns-prefetch" href="https://lh3.googleusercontent.com">
+  <!-- v4.12.37 — 스플래시 사진을 먼저 받아 둔다(로딩화면 첫 그림) -->
+  <link rel="preload" as="image" href="splash.png">
 
   <style>
     * { box-sizing: border-box; }
@@ -110,6 +117,13 @@
   </style>
 </head>
 <body>
+  <!-- v4.12.37 — 앱 문서 요청을 몇 줄이라도 먼저 시작한다(스플래시는 fixed 라 아래에 둬도 덮는다) -->
+  <iframe
+    id="app-frame"
+    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4162"
+    allow="clipboard-read; clipboard-write; camera"
+  ></iframe>
+
   <div id="boot" aria-hidden="true">
     <img class="bl" src="splash.png" alt="">
     <div class="bt">바나프레소 · 바나커피</div>
@@ -117,12 +131,6 @@
     <div class="bc"></div>
     <div class="bm">재고 데이터를 불러오는 중…</div>
   </div>
-
-  <iframe
-    id="app-frame"
-    src="https://script.google.com/macros/s/AKfycbxLARknNh7EdhMHr73c8M1UW5KeMzrVJw_t4B-zQbpcrVKVEIz_CEghKGiz-bChC0X3/exec?v=4161"
-    allow="clipboard-read; clipboard-write; camera"
-  ></iframe>
 
   <div id="badgeTip" hidden>
     <div class="bt-ic">
