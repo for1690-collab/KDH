@@ -220,7 +220,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="바나프레소·바나커피 옥길점">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="data:application/manifest&#43;json;charset=utf-8,%7B%22name%22%3A%20%22%EC%98%A5%EA%B8%B8%EC%A0%90%20%EC%9E%AC%EA%B3%A0%EA%B4%80%EB%A6%AC%22%2C%20%22short_name%22%3A%20%22%EC%98%A5%EA%B8%B8%EC%A0%90%22%2C%20%22start_url%22%3A%20%22.%22%2C%20%22scope%22%3A%20%22.%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22orientation%22%3A%20%22portrait%22%2C%20%22background_color%22%3A%20%22%23FC657E%22%2C%20%22theme_color%22%3A%20%22%23FAFAFA%22%2C%20%22lang%22%3A%20%22ko%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22https%3A%2F%2Flh3.googleusercontent.com%2Fd%2F1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6%3Ds512%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image%2Fpng%22%2C%20%22purpose%22%3A%20%22any%22%7D%2C%20%7B%22src%22%3A%20%22https%3A%2F%2Flh3.googleusercontent.com%2Fd%2F1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6%3Ds512%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image%2Fpng%22%2C%20%22purpose%22%3A%20%22maskable%22%7D%5D%7D">
+<link rel="manifest" href="data:application/manifest&#43;json;charset=utf-8,%7B%22name%22%3A%20%22%EB%B0%94%EB%82%98%ED%94%84%EB%A0%88%EC%86%8C%C2%B7%EB%B0%94%EB%82%98%EC%BB%A4%ED%94%BC%20%EC%98%A5%EA%B8%B8%EC%A0%90%22%2C%20%22short_name%22%3A%20%22%EB%B0%94%EB%82%98%ED%94%84%EB%A0%88%EC%86%8C%C2%B7%EB%B0%94%EB%82%98%EC%BB%A4%ED%94%BC%22%2C%20%22start_url%22%3A%20%22.%22%2C%20%22scope%22%3A%20%22.%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22orientation%22%3A%20%22portrait%22%2C%20%22background_color%22%3A%20%22%23FC657E%22%2C%20%22theme_color%22%3A%20%22%23FAFAFA%22%2C%20%22lang%22%3A%20%22ko%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22https%3A%2F%2Flh3.googleusercontent.com%2Fd%2F1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6%3Ds512%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image%2Fpng%22%2C%20%22purpose%22%3A%20%22any%22%7D%2C%20%7B%22src%22%3A%20%22https%3A%2F%2Flh3.googleusercontent.com%2Fd%2F1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6%3Ds512%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image%2Fpng%22%2C%20%22purpose%22%3A%20%22maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6=s512">
 <link rel="apple-touch-icon-precomposed" href="https://lh3.googleusercontent.com/d/1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6=s512">
 <link rel="icon" type="image/png" sizes="512x512" href="https://lh3.googleusercontent.com/d/1H-5arhLv8FJSASKHY_Wh-0m_p6OfQ9_6=s512">
@@ -635,7 +635,9 @@ html.pfit .rclose{width:44px;height:44px;flex-basis:44px;font-size:19px}
 }
 .addbar .abgo:active{background:#CE3B54;transform:scale(.94)}
 .addbar .abx{
-  flex:0 0 24px;width:24px;height:24px;border:0;border-radius:50%;
+  /* v4.12.44 — 24px 는 손가락으로 누르기 어렵다(전수조사 L-3) → 터치 영역만 44px,
+     보이는 크기는 그대로 두려고 음수 마진으로 자리를 상쇄한다. */
+  flex:0 0 44px;width:44px;height:44px;margin:-10px -10px -10px 0;border:0;border-radius:50%;
   background:transparent;color:#A9AEB5;font-size:15px;font-weight:500;line-height:1;
   display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
 }
@@ -2184,6 +2186,17 @@ input.b-biginp{border:0;border-radius:0;height:auto;padding:0;font-size:50px;fon
 /* ③ 설치 안내 배너 — 탭바를 덮지 않게 탭바 높이(56px)+안전영역 위로 */
 .addbar{bottom:calc(56px + env(safe-area-inset-bottom) + 10px)}
 body.b-addbar #main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+/* v4.12.44 — 홈은 아래 규칙(body[data-b-tab="home"] #main)이 같은 특이도로 뒤에 와서
+   padding-bottom 을 18px 로 되돌려 버렸다 → 설치 바가 '새 소식' 둘째 줄을 가림(전수조사 M-4).
+   배너가 떠 있을 때만 홈에도 넉넉한 아래 여백을 준다(2단계 높은 특이도). */
+body.b-addbar[data-b-tab="home"] #main{
+  padding-bottom:calc(96px + 60px + env(safe-area-inset-bottom));
+}
+@media (min-width:700px){
+  body.b-addbar[data-b-tab="home"] #main{
+    padding-bottom:calc(100px + env(safe-area-inset-bottom));
+  }
+}
 
 /* ====================================================================
  * v4.12.2 — 레시피 「제조 이미지」 아래 단계 번호·설명 띠 (표현 계층)
@@ -2613,7 +2626,7 @@ body[data-b-tab="home"] .b-hero{
   font-variant-numeric:tabular-nums}
 .b-ico .r .x-go{width:15px;height:15px;color:#D5C8C0}
 .b-ico .nt{padding:10px 15px 12px;border-top:1px solid #F8F1EC;font-size:10.5px;font-weight:650;
-  color:#8C7E76;line-height:1.6}
+  color:#8C7E76;line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
 .b-ico .nt .x-lnk{font-size:10.5px;font-weight:800;padding:0 3px;color:var(--b-pink-d)}
 
 
@@ -3532,7 +3545,7 @@ var PRICE_RAW = [
 ];
 var PRICE = {};
 for (var _pi = 0; _pi < PRICE_RAW.length; _pi++) { PRICE[PRICE_RAW[_pi][0]] = PRICE_RAW[_pi][1]; }
-var APP_VER = 'v4.12.42 첫 화면 — 깃허브 정적 호스팅·JSONP 첫 데이터·다리 저장 2026-11-28';var S = {
+var APP_VER = 'v4.12.44 전수조사 결함 일괄 수정 — 설치(192·sw·런처 prompt·삼성 안내)·배지 기기 분기·잠금 4점·공지 뒤로가기·칩 스크롤·여백 2026-11-28';var S = {
   tab:'stock',
   xApplyNeeds: [],   /* v4.12.27 — 재고 이름이 맞지 않아 수량을 넣지 못한 품목(서버 needs) */
   notices:[],
@@ -10231,7 +10244,9 @@ function render(){
 function xSaveBar(){
   var act = $('#savebar');
   var n = touchedCount();
-  if(act) act.classList.toggle('on', !!(S.ready && S.tab === 'stock' && !S.xSheet));
+  /* v4.12.44 — 부족 품목(입력 불가 화면)에서는 저장 바를 띄우지 않는다(전수조사 M-5). */
+  var auditIn = !!(S.tab === 'stock' && (S.xSeg || 'audit') === 'audit');
+  if(act) act.classList.toggle('on', !!(S.ready && auditIn && !S.xSheet));
   var btn = $('#saveBtn');
   if(btn){
     btn.disabled = !!S.saving || n === 0;
@@ -10290,7 +10305,9 @@ function xSync(){
   var ob = $('#ordbar');
   if(ob) ob.classList.toggle('on', !!(S.ready && S.tab === 'order' && !S.xSheet));
   var sbv = $('#savebar');
-  var showAct = !!(S.ready && !S.xSheet && ((S.tab === 'stock') || (S.tab === 'order')));
+  /* v4.12.44 — 재고 탭이라도 '부족 품목' 세그에서는 저장 바·진행 바를 숨긴다(전수조사 M-5). */
+  var auditIn = !!(S.tab === 'stock' && (S.xSeg || 'audit') === 'audit');
+  var showAct = !!(S.ready && !S.xSheet && (auditIn || (S.tab === 'order')));
   try{ document.body.classList.toggle('xact', showAct); }catch(e){}
   var on = $('#xOrdNote'), os = $('#xOrdSum'), obtn = $('#xOrdBtn');
   if(on) on.textContent = '총 ' + ot.count + '품목';
@@ -10301,7 +10318,7 @@ function xSync(){
     obtn.textContent = S.submitting ? '신청 중…' : '발주 신청';
   }
   var pr = $('#progress');
-  if(pr) pr.classList.toggle('on', !!(S.ready && S.tab === 'stock' && !S.xSheet));
+  if(pr) pr.classList.toggle('on', !!(S.ready && auditIn && !S.xSheet));
   xSaveBar();
   try { postAppBadge(); } catch(e){}     /* v4.12.17 — 화면이 갱신될 때마다 아이콘 숫자도 다시 센다 */
 }
@@ -10368,6 +10385,12 @@ function setTab(t){
   }
   else livePollStop();
   render();
+  /* v4.12.44 — 자료 탭으로 들어오면 선택된 칩이 화면 안에 보이게 맞춘다(전수조사 M-3). */
+  if(t === 'resources'){ try{ setTimeout(xResSegCenter, 0); }catch(e){} }
+  /* v4.12.44 — 재고 탭(한 품목씩)으로 들어오면 첫 입력칸이 화면에 보이게 스크롤만 한다(키보드는 안 띄움). */
+  if(t === 'stock' && S.xFlow && (S.xSeg || 'audit') === 'audit'){
+    try{ setTimeout(function(){ xAuditReveal(false); }, 0); }catch(e){}
+  }
 }
 /* 앱이 준비된 뒤: 공지·마감 팝업 + 매출·발주일정 한 번씩 읽기 */
 function liveAfterBoot(){
@@ -10540,7 +10563,12 @@ document.addEventListener('click', function(ev){
   else if(act === 'xSheet'){ S.xSheet = v; S.xEditQty = false; S.xApplyErr = ''; S.xApplyOk = ''; scrollSheetTop(); render(); }
   else if(act === 'xApplyAll'){ xApplyAll(); }
   else if(act === 'xClose'){ xSheetCloseState(); S.xEditQty = false; S.xDocForm = false; render(); }
-  else if(act === 'xSeg'){ S.xSeg = (v === 'short' ? 'short' : 'audit'); render(); }
+  else if(act === 'xSeg'){
+    S.xSeg = (v === 'short' ? 'short' : 'audit');
+    render();
+    /* v4.12.44 — '실사 입력' 칩을 누른 그 손가락 안에서 첫 입력칸으로 포커스(전수조사 M-6). */
+    if(S.xSeg === 'audit' && S.xFlow) xAuditReveal(true);
+  }
   else if(act === 'xGoStock'){
     var nm0 = el.getAttribute('data-name');
     S.xSeg = 'audit';
@@ -10749,7 +10777,45 @@ function xInput(ev){
   var modalBackdrop = document.getElementById('instBackdrop');
   var modalX = document.getElementById('instX');
   var modalOk = document.getElementById('instOk');
+  var guide = document.getElementById('abGuide');
   var prompt = null;
+
+  /* ---------- v4.12.44 — 설치 창은 바깥 런처가 띄운다 ------------------
+   * 앱은 iframe 이라 beforeinstallprompt 를 받지 못하고 prompt() 도 부를 수 없다.
+   * 런처(index.html)에 설치를 요청하고, 런처가 알려 주는 상태(가능/불가)를 받아
+   *  · 가능하면 설치 창을 띄우고  · 불가하면 기기별 수동 경로를 안내한다. */
+  var hAvail = false, hPlatform = '', hSamsung = false, hStandalone = false;
+  function hostPost(msg){
+    try{
+      if(window.top && window.top !== window){ window.top.postMessage(msg, '*'); return true; }
+    }catch(e){}
+    return false;
+  }
+  function installHello(){ try{ hostPost({ type: 'okgil-install-hello' }); }catch(e){} }
+  function guideText(){
+    if(hSamsung) return '오른쪽 아래 메뉴(≡) → + 현재 페이지 추가';
+    if(hPlatform === 'ios') return '사파리 공유 ⬆️ → 홈 화면에 추가';
+    if(hPlatform === 'android') return '브라우저 메뉴(⋮) → 앱 설치 / 홈 화면에 추가';
+    return '휴대폰·PC에서 앱처럼 바로 열기';
+  }
+  window.addEventListener('message', function(ev){
+    var d = ev.data;
+    if(!d || d.type !== 'okgil-install-state') return;
+    hAvail = !!d.available;
+    hStandalone = !!d.standalone;
+    if(d.platform) hPlatform = String(d.platform);
+    hSamsung = !!d.samsung;
+    try{ if(guide) guide.textContent = guideText(); }catch(e){}
+    if(d.installed || d.result === 'accepted' || d.result === 'installed'){
+      try{ hostSet(KEY, INSTALLED); }catch(e){}
+      hide();
+      return;
+    }
+    if(d.result === 'unavailable') openInstallModal();
+  });
+  setTimeout(installHello, 900);
+  window.addEventListener('load', installHello);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) installHello(); });
 
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
@@ -10781,6 +10847,7 @@ function xInput(ev){
     var isIpad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     var isIphone = /iPhone|iPod/i.test(ua);
     var isAndroid = /Android/i.test(ua);
+    var isSamsung = /SamsungBrowser/i.test(ua);
 
     var html = '';
     if(isIpad || isIphone){
@@ -10796,6 +10863,20 @@ function xInput(ev){
             + '<div class="inst-step-row">'
             + '  <div class="inst-num">3</div>'
             + '  <div class="inst-msg">우측 상단 <b>‘추가’</b>를 누르면 바탕화면에 바로가기가 설치됩니다!</div>'
+            + '</div>';
+    } else if(isAndroid && isSamsung){
+      /* v4.12.44 — 삼성 인터넷은 크롬의 ⋮ 메뉴가 아니라 오른쪽 아래 메뉴(≡)다(전수조사 H-1). */
+      html += '<div class="inst-step-row">'
+            + '  <div class="inst-num">1</div>'
+            + '  <div class="inst-msg">화면 <b>오른쪽 아래 메뉴(≡)</b>를 누릅니다.</div>'
+            + '</div>'
+            + '<div class="inst-step-row">'
+            + '  <div class="inst-num">2</div>'
+            + '  <div class="inst-msg"><b>‘+ 현재 페이지 추가’</b>를 누릅니다.</div>'
+            + '</div>'
+            + '<div class="inst-step-row">'
+            + '  <div class="inst-num">3</div>'
+            + '  <div class="inst-msg"><b>‘홈 화면’</b>을 고르면 바탕화면에 아이콘이 생깁니다.</div>'
             + '</div>';
     } else if(isAndroid){
       html += '<div class="inst-step-row">'
@@ -10830,6 +10911,10 @@ function xInput(ev){
 
   function handleAction(e){
     if(e) e.stopPropagation();
+    /* v4.12.44 — 최상위 런처가 설치 가능하다고 알려 왔으면, 설치 창은 런처가 띄운다. */
+    if(hAvail){
+      if(hostPost({ type: 'okgil-install-prompt' })) return;
+    }
     if(prompt){
       prompt.prompt();
       prompt.userChoice.then(function(choice){
@@ -10910,7 +10995,7 @@ var LOCK_LS = 'okgil.salesLock.v1';
 var LOCK_MIN = 30;              /* 해제 유지(분) */
 var LOCK_FAIL_MAX = 5;          /* 연속 실패 허용 */
 var LOCK_BLOCK_MS = 30000;      /* 5회 실패 뒤 30초 입력 잠금 */
-var LOCK_PLACE = '\u2022\u2022\u2022\u2022\u2022';
+var LOCK_PLACE = '\u2022\u2022\u2022\u2022';   /* v4.12.44 — 암호가 4자리라 자리표시도 4점(5점이었다) */
 var lockBusy = false, lockWasBlocked = false;
 
 function lockLoad(){
@@ -11298,8 +11383,15 @@ function askBadgeState(){
   try{ xHostPost({ type: 'okgil-badge-hello' }); }catch(e){}
 }
 function xBadgeAsk(){
+  /* v4.12.44 — 지원하지 않는 브라우저(안드로이드 크롬·삼성 인터넷 등)에서는
+     켜기 버튼이 아예 없으므로 안내 토스트도 그 사실만 알린다(전수조사 H-2). */
+  if(S.badgeSupported === false || S.badgePerm === 'unsupported'){
+    toast('이 브라우저에서는 아이콘 숫자 알림을 지원하지 않습니다', 'ok');
+    return;
+  }
   try{ xHostPost({ type: 'okgil-badge-ask' }); }catch(e){}
-  toast('화면 아래쪽 바나프레소·바나커피 옥길점 🔔 켜기 버튼을 눌러 주세요', 'ok');
+  var where = (S.badgePlatform === 'android') ? '화면 아래쪽 알림 안내의 [켜기] 버튼' : '화면 아래쪽 🔔 켜기 버튼';
+  toast(where + '을 눌러 주세요', 'ok');
 }
 /* 런처가 알려 주는 알림 권한 상태 — 아이콘 숫자가 보이는지 카드에 그대로 적는다. */
 window.addEventListener('message', function(ev){
@@ -11307,18 +11399,31 @@ window.addEventListener('message', function(ev){
   if(!d || d.type !== 'okgil-badge-state') return;
   var p = String(d.permission || '');
   if(['granted', 'denied', 'default', 'unsupported'].indexOf(p) < 0) return;
-  if(S.badgePerm !== p){
-    S.badgePerm = p;
-    if(S.tab === 'home' && S.ready) render();
-  }
+  /* v4.12.44 — 기기(ios/android/other)와 지원 여부를 함께 받아 문구를 가른다. */
+  var plat = String(d.platform || '');
+  var sup = (d.supported === false) ? false : ((d.supported === true) ? true : null);
+  var changed = (S.badgePerm !== p) || (S.badgePlatform !== plat) || (S.badgeSupported !== sup);
+  S.badgePerm = p;
+  if(plat) S.badgePlatform = plat;
+  if(sup !== null) S.badgeSupported = sup;
+  if(changed && S.tab === 'home' && S.ready) render();
 });
+function xBadgeSupported(){
+  /* 런처가 아직 상태를 못 보냈으면(undefined) 지원하는 것으로 보고 기존 문구를 유지한다. */
+  return S.badgeSupported !== false && S.badgePerm !== 'unsupported';
+}
 function xBadgePermNote(){
   var p = S.badgePerm;
+  /* v4.12.44 — 지원 자체가 없는 브라우저에서는 '아이폰 설정' 경로를 안내하지 않는다. */
+  if(!xBadgeSupported()) return '이 브라우저에서는 아이콘 숫자 알림을 지원하지 않습니다.';
   if(p === 'granted') return '홈 화면 아이콘에 같은 숫자가 표시됩니다. 앱을 열 때마다 새로 셉니다.';
-  if(p === 'denied') return '아이콘 숫자는 아이폰 [설정 > 바나프레소·바나커피 옥길점 > 알림]을 켜야 보입니다.';
+  if(p === 'denied'){
+    if(S.badgePlatform === 'android') return '아이콘 숫자는 기기 [설정 > 애플리케이션 > 사용 중인 브라우저 > 알림]에서 알림을 허용해야 보입니다.';
+    if(S.badgePlatform === 'other') return '아이콘 숫자는 브라우저 주소창의 자물쇠 > 알림 에서 허용해야 보입니다.';
+    return '아이콘 숫자는 아이폰 [설정 > 바나프레소·바나커피 옥길점 > 알림]을 켜야 보입니다.';
+  }
   if(p === 'default') return '아이콘 숫자를 보려면 알림을 한 번 허용해야 합니다. '
     + '<button class="x-lnk" data-act="xBadgeAsk" type="button">켜는 방법</button>';
-  if(p === 'unsupported') return '이 브라우저는 홈 화면 아이콘 숫자를 지원하지 않습니다.';
   return '앱을 열 때마다 새로 셉니다. 홈 화면 아이콘 숫자는 알림을 허용해야 보입니다.';
 }
 /* 홈 '아이콘 알림' 카드 — 지금 숫자가 왜 N인지 항목별로 보여 준다. 0이면 그리지 않는다. */
@@ -11857,6 +11962,16 @@ function bFocusNow(){
   if(!el) return;
   try{ el.focus(); if(el.select) el.select(); }catch(e){}
 }
+/* v4.12.44 — 재고 탭 첫 진입·세그 전환에서 입력칸을 보이게(그리고 선택적으로 포커스) 한다(전수조사 M-6).
+ *   · 탭바로 들어오기: 입력칸이 화면에 보이게만 한다. 여기서 focus() 하면 아이폰 키보드가
+ *     화면 절반을 덮어 첫 화면(진행률·품목 이름)을 가린다. 한 번 더 누르면 그때 키보드가 뜬다.
+ *   · '실사 입력' 칩·'한 품목씩'·'다음'(사용자가 입력을 시작한 동작): 그 제스처 안에서 포커스. */
+function xAuditReveal(focus){
+  var el = $('#bBigQ') || $('#bBigP');
+  if(!el) return;
+  if(focus){ bFocusNow(); return; }
+  try{ el.scrollIntoView({ block: 'center', inline: 'nearest' }); }catch(e){}
+}
 function bGoStep(d){
   var list = bAuditList();
   if(!list.length) return;
@@ -12012,6 +12127,28 @@ function renderResources(){
   else h += xMenuSheet();
   return h;
 }
+/* v4.12.44 — 자료 탭 선택 칩이 화면 밖에 잘린 채 검게 선택되던 문제(전수조사 M-3).
+ * 가로 스크롤(.b-seg) 안에서 선택 칩을 가운데로 끌어온다. 지원하지 않는 브라우저는 scrollLeft 로 처리. */
+function xResSegCenter(){
+  try{
+    var box = document.querySelector('#main .b-seg');
+    if(!box) return;
+    var on = box.querySelector('button[data-act="xbRes"].on');
+    if(!on) return;
+    var bw = box.clientWidth || 0, ow = on.offsetWidth || 0;
+    var target = on.offsetLeft - (bw - ow) / 2;
+    if(target < 0) target = 0;
+    var max = Math.max(0, (box.scrollWidth || 0) - bw);
+    if(target > max) target = max;
+    if(typeof on.scrollIntoView === 'function'){
+      on.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+    if(typeof box.scrollTo === 'function'){
+      try{ box.scrollTo({ left: target, behavior: 'smooth' }); }
+      catch(e0){ box.scrollLeft = target; }
+    }
+  }catch(e){}
+}
 function bRecipeList(){
   var h = '<div class="x-note" style="padding:2px 3px">최신본 · 묶음을 누르면 원본 페이지가 열립니다.</div>';
   (LIBG || []).forEach(function(g, i){
@@ -12103,7 +12240,7 @@ document.addEventListener('click', function(ev){
     if(m2) m2.scrollTop = 0;
     bFocusNow();     /* 탭 누른 그 손가락 안에서 포커스 → iOS 숫자 키보드가 바로 올라온다 */
   }
-  else if(act === 'xbRes'){ S.resSeg = (v || 'notice'); setTab('resources'); }
+  else if(act === 'xbRes'){ S.resSeg = (v || 'notice'); setTab('resources'); try{ setTimeout(xResSegCenter, 0); }catch(e){} }
   else if(act === 'xbLib'){ openLib(); libGroup(Number(v)); }
 });
 
@@ -12343,7 +12480,7 @@ function docTitleClean(n){
       else if(t === '#rlib'){ closeLib(); }
       else if(t === '#rview'){ closeViewer(); }
       else if(t === '#rmodal'){ closeRecipe(); }
-      else if(t === '#noticePop'){ noticePopAck(); }
+      else if(t === '#noticePop'){ noticePopClose(true); }
       else if(t === '#ordAlert'){ oapClose(); }
       else if(t === '#instModal'){
         var b = document.getElementById('instBk');
